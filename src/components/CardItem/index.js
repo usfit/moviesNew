@@ -1,4 +1,3 @@
-import CardItem from "./CardItem";
-import CardItemSmall from "./CardItemSmall";
+import CardItem from './CardItem';
 
-export { CardItem, CardItemSmall };
+export default CardItem;

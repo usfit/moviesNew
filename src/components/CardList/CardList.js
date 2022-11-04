@@ -1,28 +1,37 @@
-import React from "react";
+import React from 'react';
+import { Row, Col, Pagination } from 'antd';
+import { v4 as uuidv4 } from 'uuid';
 
-import {Row, Col, Pagination} from 'antd';
+import CardItem from '../CardItem';
 
-import { CardItem } from "../CardItem";
+import notFound from './notFound.png';
 
-// if (window.innerWidth > 520) {
-//   return <CardItem />;
-// } else {
-//   return <CardItemSmall />;
-// }
+import './CardList.css';
 
-function CardList() {
+function CardList({ movieData, totalResults, imageURL }) {
+  let components = null;
+  components = movieData.map((item) => {
+    const image = [item.poster_path ? `${imageURL}${item.poster_path}` : notFound];
+    return (
+      <Col key={uuidv4()}>
+        <CardItem
+          key={uuidv4()}
+          title={item.title}
+          date={item.release_date}
+          description={item.overview}
+          image={image}
+        />
+      </Col>
+    );
+  });
+
   return (
-    <>
-      <Row gutter={[36, 35]} justify='center'>
-        <Col><CardItem /></Col>
-        <Col><CardItem /></Col>
-        <Col><CardItem /></Col>
-        <Col><CardItem /></Col>
-        <Col><CardItem /></Col>
+    <div className="CardList">
+      <Row gutter={[36, 35]} justify="center">
+        {components}
       </Row>
-      <Pagination total={20} />
-      
-    </>
+      <Pagination total={totalResults} pageSize={20} showSizeChanger={false} defaultCurrent={1} current={1} />
+    </div>
   );
 }
 

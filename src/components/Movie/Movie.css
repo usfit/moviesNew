@@ -1,0 +1,14 @@
+.Movies {
+  padding: 13px 36px 18px 36px;
+}
+
+.ant-tabs-top > .ant-tabs-nav {
+  max-width: 146px;
+  margin: 0;
+}
+
+.ant-tabs {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}

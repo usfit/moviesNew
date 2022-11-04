@@ -1,7 +1,7 @@
 class MovieServise {
-  baseUrl = "https://api.themoviedb.org/3/";
+  baseUrl = 'https://api.themoviedb.org/3/';
 
-  key = "api_key=46de638241c04e3c39b3cee8c2703a3d";
+  key = 'api_key=46de638241c04e3c39b3cee8c2703a3d';
 
   // Запрос на список фильмов
 
@@ -10,6 +10,18 @@ class MovieServise {
     const res = await fetch(url);
     if (!res.ok) {
       throw new Error(`Ответ в сети был не ок , статус ${res.status}`);
+    }
+    const body = await res.json();
+    return body;
+  }
+
+  // Получаем список жанров
+
+  async loadGenreList() {
+    const url = `${this.baseUrl}genre/movie/list?${this.key}&language=en-US`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Не удалось получить список жанров , статус ${res.status}`);
     }
     const body = await res.json();
     return body;

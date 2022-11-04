@@ -1,3 +1,3 @@
-import MovieServise from "./MovieServise";
+import MovieServise from './MovieServise';
 
 export default MovieServisel;

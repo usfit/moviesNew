@@ -1,6 +1,5 @@
-@import '~antd/dist/antd.css';
+@import "~antd/dist/antd.css";
 
 body {
-    font-family: 'Inter';
-    padding-top: 15px;
+  font-family: "Inter";
 }

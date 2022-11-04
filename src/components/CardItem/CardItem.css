@@ -24,6 +24,10 @@ div.ant-typography-h4 > textarea,
   font-weight: 400;
 }
 
+h4.ant-typography {
+  width: 200px;
+}
+
 .CardItem__main-content {
   padding: 12px 20px;
   gap: 7px;
@@ -33,6 +37,10 @@ div.ant-typography-h4 > textarea,
 .CardItem__data {
   font-size: 12px;
   line-height: 22px;
+}
+
+.ant-layout-content {
+  padding: 0 10px;
 }
 
 div.ant-typography,
@@ -51,7 +59,6 @@ div.ant-typography,
   align-items: center;
   font-size: 15px;
   width: 239px;
-  height: 46px;
 }
 
 .iconRating {

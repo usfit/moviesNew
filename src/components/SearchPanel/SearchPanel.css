@@ -1,0 +1,9 @@
+.SearchPanel {
+  max-width: 945px;
+}
+
+@media (max-width: 1016px) {
+  .SearchPanel {
+    max-width: 455px;
+  }
+}
