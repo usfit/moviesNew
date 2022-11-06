@@ -4,6 +4,12 @@ import { Tabs } from 'antd';
 
 import MovieServise from '../../servises/MovieServise';
 import MovieView from '../MovieView';
+import MovieViewRated from '../MovieView/MovieViewRated';
+import { Provider } from '../ServiceContext/ServiceContext';
+import SearchPanel from '../SearchPanel';
+
+import Spinner from './Spinner';
+import ErrorMessage from './ErrorMessage';
 
 import './Movie.css';
 
@@ -12,16 +18,34 @@ class Movie extends Component {
 
   state = {
     movieData: null,
-    totalResults: 0,
+    totalResults: 1,
     imageURL: 'https://image.tmdb.org/t/p/original',
-    loading: true,
+    loading: false,
     error: false,
-    query: 'return',
+    errorNetwork: false,
+    query: null,
     page: 1,
+    genreList: null,
+    guestSessionId: null,
+    ratedMovieData: null,
+    ratedTotalResults: 1,
+    ratedPage: 1,
   };
 
   componentDidMount() {
+    this.movieServise.openGuestSession().then(this.newGuestSession).catch(this.onError);
+    this.loadGenreList();
     this.updateSearchMovies();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { query, page, ratedPage } = this.state;
+    if (query !== prevState.query || page !== prevState.page) {
+      this.updateSearchMovies();
+    }
+    if (ratedPage !== prevState.ratedPage) {
+      this.getRatedMovies();
+    }
   }
 
   onLoadMovies = (result) => {
@@ -46,14 +70,6 @@ class Movie extends Component {
     }
   };
 
-  updateSearchMovies = () => {
-    const { query, page } = this.state;
-    if (!query) {
-      return;
-    }
-    this.movieServise.getSearchMovies(query, page).then(this.onLoadMovies).catch(this.onError);
-  };
-
   onError = (e) => {
     if (e.message === 'Failed to fetch') {
       this.setState(() => {
@@ -70,12 +86,136 @@ class Movie extends Component {
     });
   };
 
+  updateSearchMovies = () => {
+    const { query, page } = this.state;
+    if (!query) {
+      return;
+    }
+    this.setState(() => {
+      return { loading: true };
+    });
+    this.movieServise.getSearchMovies(query, page).then(this.onLoadMovies).catch(this.onError);
+  };
+
+  getGenreList = (result) => {
+    const genreList = Array.from(result.genres);
+    this.setState(() => {
+      return {
+        genreList,
+      };
+    });
+  };
+
+  loadGenreList = () => {
+    this.movieServise.loadGenreList().then(this.getGenreList).catch(this.onError);
+  };
+
+  сlickPagination = (e) => {
+    this.setState(() => {
+      return {
+        page: e,
+      };
+    });
+  };
+
+  queryValue = (e) => {
+    const newQuery = e.target.value;
+    this.setState(() => {
+      return {
+        query: newQuery,
+      };
+    });
+  };
+
+  newGuestSession = (result) => {
+    const guesSession = result.guest_session_id;
+    this.setState(() => {
+      return { guestSessionId: guesSession };
+    });
+  };
+
+  setRatingMovie = (item) => {
+    const { guestSessionId } = this.state;
+    const rate = item.rating;
+    const movieId = item.id;
+    this.movieServise.postMovieRating(rate, movieId, guestSessionId).catch(this.onError);
+  };
+
+  onLoadRatedMovies = (result) => {
+    const movies = result.results;
+    const ratedTotalResults = result.total_results;
+    if (movies.length !== 0) {
+      this.setState(() => {
+        return {
+          ratedMovieData: movies,
+          ratedTotalResults,
+        };
+      });
+    }
+  };
+
+  getRatedMovies = () => {
+    const { guestSessionId, ratedPage } = this.state;
+    if (guestSessionId) {
+      this.movieServise.loadRatedMovies(guestSessionId, ratedPage).then(this.onLoadRatedMovies).catch(this.onError);
+    }
+  };
+
+  changeSearchStatus = () => {
+    this.getRatedMovies();
+  };
+
+  ratedClickPagination = (e) => {
+    this.setState(() => {
+      return {
+        ratedPage: e,
+      };
+    });
+  };
+
   render() {
-    const { movieData, totalResults, imageURL, error, loading } = this.state;
+    const {
+      movieData,
+      totalResults,
+      imageURL,
+      error,
+      errorNetwork,
+      loading,
+      genreList,
+      page,
+      ratedMovieData,
+      ratedTotalResults,
+      ratedPage,
+    } = this.state;
     const hasData = !error && !loading;
+    const errorMessage = [error ? <ErrorMessage key={uuidv4()} errorNetwork={errorNetwork} /> : null];
+    const spin = [loading ? <Spinner key={uuidv4()} /> : null];
+    const noneContent = [hasData && !movieData ? <h1 key={uuidv4()}>По вашему запросу ничего не найдено</h1> : null];
     const content = [
-      hasData && movieData ? (
-        <MovieView imageURL={imageURL} movieData={movieData} key={uuidv4()} totalResults={totalResults} />
+      hasData && movieData && genreList ? (
+        <MovieView
+          imageURL={imageURL}
+          movieData={movieData}
+          key={uuidv4()}
+          totalResults={totalResults}
+          сlickPagination={(e) => this.сlickPagination(e)}
+          page={page}
+          setRatingMovie={(item) => this.setRatingMovie(item)}
+        />
+      ) : null,
+    ];
+
+    const noneRatedContent = [!ratedMovieData ? <h1 key={uuidv4()}>Вы еще не оценили ни один фильм</h1> : null];
+    const ratedContent = [
+      ratedMovieData ? (
+        <MovieViewRated
+          imageURL={imageURL}
+          movieData={ratedMovieData}
+          key={uuidv4()}
+          totalResults={ratedTotalResults}
+          page={ratedPage}
+          сlickPagination={(e) => this.ratedClickPagination(e)}
+        />
       ) : null,
     ];
 
@@ -83,19 +223,34 @@ class Movie extends Component {
       {
         label: 'Search',
         key: 'item-1',
-        children: <>{content}</>,
+        children: (
+          <div className="MovieView">
+            <SearchPanel queryValue={(e) => this.queryValue(e)} />
+            {errorMessage}
+            {spin}
+            {noneContent}
+            {content}
+          </div>
+        ),
       },
       {
         label: 'Rated',
         key: 'item-2',
-        children: <h1>Заглушка</h1>,
+        children: (
+          <>
+            {noneRatedContent}
+            {ratedContent}
+          </>
+        ),
       },
     ];
 
     return (
-      <div className="Movies">
-        <Tabs centered defaultActiveKey="1" items={tabsItems} />
-      </div>
+      <Provider value={genreList}>
+        <div className="Movies">
+          <Tabs centered defaultActiveKey="1" items={tabsItems} onChange={this.changeSearchStatus} />
+        </div>
+      </Provider>
     );
   }
 }

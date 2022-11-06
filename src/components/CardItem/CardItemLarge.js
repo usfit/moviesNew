@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Card, Tag, Layout, Rate, Image } from 'antd';
+import { Typography, Card, Layout, Rate, Image } from 'antd';
 import { format } from 'date-fns';
 
 import './CardItem.css';
@@ -22,12 +22,22 @@ function formatData(data) {
   }
 }
 
-function CardItemLarge({ title, date, description, image }) {
+function CardItemLarge({ title, date, description, image, genre, average, setRatingMovie, rating }) {
+  let colorRate;
+  if (average > 7) {
+    colorRate = 'colorRare-four';
+  } else if (average > 5) {
+    colorRate = 'colorRate-three';
+  } else if (average > 3) {
+    colorRate = 'colorRate--two';
+  } else {
+    colorRate = 'colorRate--one';
+  }
   const { Title, Paragraph } = Typography;
   const { Sider, Content } = Layout;
   return (
     <Card className="CardItem">
-      <div className="iconRating">{6.6}</div>
+      <div className={`iconRating ${colorRate}`}>{average}</div>
       <Layout>
         <Sider className="CardItem__image" width={183}>
           <Image src={image} />
@@ -36,11 +46,17 @@ function CardItemLarge({ title, date, description, image }) {
           <div className="CardItem__header">
             <Title level={4}>{`${title}`}</Title>
             <Paragraph className="CardItem__data">{formatData(date)}</Paragraph>
-            <Tag color="default">Action</Tag>
-            <Tag color="default">Drama</Tag>
+            {genre}
           </div>
           <Content>{shotText(description)}</Content>
-          <Rate className="stars" allowHalf count={10} />
+          <Rate
+            className="stars"
+            allowHalf
+            count={10}
+            onChange={(e) => setRatingMovie(e)}
+            defaultValue={rating}
+            allowClear={false}
+          />
         </Layout>
       </Layout>
     </Card>

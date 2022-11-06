@@ -1,16 +1,17 @@
 import React from 'react';
 
 import CardList from '../CardList';
-import SearchPanel from '../SearchPanel';
 
-import './MovieView.css';
-
-function MovieView({ movieData, totalResults, imageURL }) {
+function MovieView({ movieData, totalResults, imageURL, сlickPagination, page, setRatingMovie }) {
   return (
-    <div className="MovieView">
-      <SearchPanel />
-      <CardList movieData={movieData} totalResults={totalResults} imageURL={imageURL} />
-    </div>
+    <CardList
+      movieData={movieData}
+      totalResults={totalResults}
+      imageURL={imageURL}
+      сlickPagination={(e) => сlickPagination(e)}
+      page={page}
+      setRatingMovie={(item) => setRatingMovie(item)}
+    />
   );
 }
 
