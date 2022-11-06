@@ -65,7 +65,6 @@ class MovieServise {
       throw new Error(`Ответ в сети был не ок , статус ${res.status}`);
     }
     const body = await res.json();
-    console.log(body);
     return body;
   }
 }
