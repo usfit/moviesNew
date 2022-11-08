@@ -16,11 +16,6 @@ class ImageLoading extends Component {
   async onLoadImage(url) {
     const res = await fetch(url, {
       method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      referrerPolicy: 'no-referrer',
     });
     if (res.ok) {
       this.setState(() => {
