@@ -4,12 +4,10 @@ import { Tabs } from 'antd';
 
 import MovieServise from '../../servises/MovieServise';
 import MovieView from '../MovieView';
-import MovieViewRated from '../MovieView/MovieViewRated';
-import { Provider } from '../ServiceContext/ServiceContext';
+import { Provider } from '../../servises/ServiceContext';
 import SearchPanel from '../SearchPanel';
-
-import Spinner from './Spinner';
-import ErrorMessage from './ErrorMessage';
+import Spinner from '../Spinner';
+import ErrorMessage from '../ErrorMessage';
 
 import './Movie.css';
 
@@ -19,7 +17,6 @@ class Movie extends Component {
   state = {
     movieData: null,
     totalResults: 1,
-    imageURL: 'https://image.tmdb.org/t/p/original',
     loading: false,
     error: false,
     errorNetwork: false,
@@ -35,7 +32,7 @@ class Movie extends Component {
   componentDidMount() {
     this.movieServise.openGuestSession().then(this.newGuestSession).catch(this.onError);
     this.loadGenreList();
-    this.updateSearchMovies();
+    this.getTopMovies();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -49,6 +46,7 @@ class Movie extends Component {
   }
 
   onLoadMovies = (result) => {
+    const { query } = this.state;
     const movies = result.results;
     const totalResults = result.total_results;
     if (movies.length !== 0) {
@@ -68,6 +66,17 @@ class Movie extends Component {
         };
       });
     }
+    if (!query) {
+      this.setState(() => {
+        return {
+          totalResults: 20,
+        };
+      });
+    }
+  };
+
+  getTopMovies = () => {
+    this.movieServise.getTopMovies().then(this.onLoadMovies).catch(this.onError);
   };
 
   onError = (e) => {
@@ -177,7 +186,6 @@ class Movie extends Component {
     const {
       movieData,
       totalResults,
-      imageURL,
       error,
       errorNetwork,
       loading,
@@ -186,6 +194,7 @@ class Movie extends Component {
       ratedMovieData,
       ratedTotalResults,
       ratedPage,
+      query,
     } = this.state;
     const hasData = !error && !loading;
     const errorMessage = [error ? <ErrorMessage key={uuidv4()} errorNetwork={errorNetwork} /> : null];
@@ -194,7 +203,6 @@ class Movie extends Component {
     const content = [
       hasData && movieData && genreList ? (
         <MovieView
-          imageURL={imageURL}
           movieData={movieData}
           key={uuidv4()}
           totalResults={totalResults}
@@ -208,8 +216,7 @@ class Movie extends Component {
     const noneRatedContent = [!ratedMovieData ? <h1 key={uuidv4()}>Вы еще не оценили ни один фильм</h1> : null];
     const ratedContent = [
       ratedMovieData ? (
-        <MovieViewRated
-          imageURL={imageURL}
+        <MovieView
           movieData={ratedMovieData}
           key={uuidv4()}
           totalResults={ratedTotalResults}
@@ -225,7 +232,7 @@ class Movie extends Component {
         key: 'item-1',
         children: (
           <div className="MovieView">
-            <SearchPanel queryValue={(e) => this.queryValue(e)} />
+            <SearchPanel query={query} queryValue={(e) => this.queryValue(e)} />
             {errorMessage}
             {spin}
             {noneContent}

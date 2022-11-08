@@ -19,8 +19,15 @@ const debounce = (fn, debounceTime) => {
 
 const debouncedFn = debounce(searchValue, 800);
 
-function SearchPanel({ queryValue }) {
-  return <Input className="SearchPanel" placeholder="Type to search..." onChange={(e) => debouncedFn(e, queryValue)} />;
+function SearchPanel({ query, queryValue }) {
+  return (
+    <Input
+      defaultValue={query}
+      className="SearchPanel"
+      placeholder="Type to search..."
+      onChange={(e) => debouncedFn(e, queryValue)}
+    />
+  );
 }
 
 export default SearchPanel;

@@ -4,8 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import CardItem from '../CardItem';
 
-import notFound from './notFound.png';
-
 import './CardList.css';
 
 const setRating = (e, item, setRatingMovie) => {
@@ -14,18 +12,17 @@ const setRating = (e, item, setRatingMovie) => {
   setRatingMovie(item);
 };
 
-function CardList({ movieData, totalResults, imageURL, сlickPagination, page, setRatingMovie }) {
+function CardList({ movieData, totalResults, сlickPagination, page, setRatingMovie }) {
   let components = null;
   components = movieData.map((item) => {
-    const image = [item.poster_path ? `${imageURL}${item.poster_path}` : notFound];
     return (
       <Col key={uuidv4()}>
         <CardItem
-          key={uuidv4()}
+          key={item.id}
           title={item.title}
           date={item.release_date}
           description={item.overview}
-          image={image}
+          image={item.poster_path}
           genre={item.genre_ids}
           average={item.vote_average.toFixed(1)}
           setRatingMovie={(e) => setRating(e, item, setRatingMovie)}
